@@ -132,7 +132,7 @@ class _UserInfoPage2State extends State<UserInfoPage2> {
                   ),
                   child: Center(
                     child: Text(
-                      "Next",
+                      "Continue",
                       style: TextStyle(color: ColorConst.text1, fontWeight: FontWeight.w600, fontSize: width * 0.04),
                     ),
                   ),

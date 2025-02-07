@@ -4,7 +4,6 @@ class ImageConst{
   static const google = 'assets/images/Google.png';
   static const facebook = 'assets/images/Facebook.png';
   static const background = 'assets/images/workout.png';
-  static const congrats = 'assets/images/g10.png';
   static const splashBackground = 'assets/images/workout 2.png';
 
   static const exercise = 'assets/images/home/gym exercise.png';

@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:diet_application/constants/color_constents.dart';
+import 'package:diet_application/screens/user_info/user_info_height.dart';
 import 'package:flutter/material.dart';
 
 import '../../main.dart';
@@ -57,86 +58,24 @@ class _UserInfoWeightState extends State<UserInfoWeight> {
             style: TextStyle(color: ColorConst.text1, fontSize: width * 0.03),
             textAlign: TextAlign.center,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "165",
-                style: TextStyle(
-                    color: ColorConst.text1,
-                    fontWeight: FontWeight.w600,
-                    fontSize: height * 0.065),
-              ),
-              Text(
-                " cm",
-                style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: ColorConst.textFieldText,
-                    fontSize: height * 0.04),
-              )
-            ],
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.center,
+          //   children: [
+          //   ],
+          // ),
+          WeightScaleWidget(
+            minWeight: 0,
+            maxWeight: 200,
+            initialWeight: 70,
+            onWeightChanged: (weight) {
+              print('New weight: $weight');
+            },
           ),
-          CarouselSlider(
-            options: CarouselOptions(
-              height: height * 0.16,
-              enlargeCenterPage: true,
-              viewportFraction: 0.2,
-              onPageChanged: (index, reason) {
-                setState(() {
-                  _currentIndex = index;
-                });
-              },
-            ),
-            items: List.generate(60, (index) {
-              bool isSelected =
-                  index == _currentIndex; // Highlight the selected number
-
-              return Container(
-                width: 100, // Adjust width as needed
-                alignment: Alignment.center,
-                child: Opacity(
-                  opacity: isSelected ? 1.0 : 0.5, // Highlight selected number
-                  child: Text(
-                    "${index + 1}",
-                    style: TextStyle(
-                      color: isSelected
-                          ? Colors.white
-                          : Colors.white.withOpacity(0.5), // Highlight color
-                      fontSize: 40, // Bigger digits
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              );
-            }),
-          ),
-          Container(
-            width: double.infinity,
-            height: 100,
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.black, width: 2),
-            ),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: List.generate(20, (index) {
-                  return Container(
-                    width: 2,
-                    height: index % 5 == 0 ? 50 : 30,
-                    color: Colors.black,
-                    margin: EdgeInsets.symmetric(horizontal: 7),
-                  );
-                }),
-              ),
-            ),
-          ),
-          Icon(
-            Icons.arrow_drop_up_rounded,
-            size: height * 0.13,
-            color: ColorConst.subHead,
-          ),
+          // Icon(
+          //   Icons.arrow_drop_up_rounded,
+          //   size: height * 0.13,
+          //   color: ColorConst.subHead,
+          // ),
           ClipRRect(
             borderRadius: BorderRadius.circular(20),
             child: BackdropFilter(
@@ -146,7 +85,7 @@ class _UserInfoWeightState extends State<UserInfoWeight> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => UserInfoWeight(),
+                        builder: (context) => UserInfoHeight(),
                       ));
                 },
                 child: Container(
@@ -160,7 +99,7 @@ class _UserInfoWeightState extends State<UserInfoWeight> {
                   ),
                   child: Center(
                     child: Text(
-                      "Next",
+                      "Continue",
                       style: TextStyle(
                           color: ColorConst.text1,
                           fontWeight: FontWeight.w600,
@@ -175,6 +114,187 @@ class _UserInfoWeightState extends State<UserInfoWeight> {
       ),
     );
   }
+}
+
+class WeightScaleWidget extends StatefulWidget {
+  final double minWeight;
+  final double maxWeight;
+  final double initialWeight;
+  final void Function(double)? onWeightChanged;
+
+  const WeightScaleWidget({
+    Key? key,
+    this.minWeight = 0,
+    this.maxWeight = 200,
+    this.initialWeight = 70,
+    this.onWeightChanged,
+  }) : super(key: key);
+
+  @override
+  _WeightScaleWidgetState createState() => _WeightScaleWidgetState();
+}
+
+class _WeightScaleWidgetState extends State<WeightScaleWidget> {
+  late TextEditingController _controller;
+  late double _currentWeight;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentWeight = widget.initialWeight;
+    _controller = TextEditingController(text: _currentWeight.toStringAsFixed(1));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _updateWeight(double value) {
+    setState(() {
+      _currentWeight = value;
+      _controller.text = value.toStringAsFixed(1);
+    });
+    widget.onWeightChanged?.call(value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Digital display
+        Container(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 150,
+                child: TextField(
+                  controller: _controller,
+                  readOnly: true,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold,color: ColorConst.text1),
+                  decoration: const InputDecoration(
+                    suffix: Text('kg'),
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (value) {
+                    final newWeight = double.tryParse(value);
+                    if (newWeight != null &&
+                        newWeight >= widget.minWeight &&
+                        newWeight <= widget.maxWeight) {
+                      _updateWeight(newWeight);
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Scale widget
+        Container(
+          height: 150,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Stack(
+            children: [
+              // Scale lines
+              CustomPaint(
+                size: Size.infinite,
+                painter: ScalePainter(
+                  minWeight: widget.minWeight,
+                  maxWeight: widget.maxWeight,
+                  currentWeight: _currentWeight,
+                ),
+              ),
+              // Slider
+              SliderTheme(
+                data: SliderThemeData(
+                  activeTrackColor: Colors.yellow,
+                  inactiveTrackColor: Colors.grey[300],
+                  thumbColor: Colors.yellow,
+                  overlayColor: Colors.yellow.withOpacity(0.3),
+                ),
+                child: Slider(
+                  value: _currentWeight,
+                  min: widget.minWeight,
+                  max: widget.maxWeight,
+                  onChanged: _updateWeight,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class ScalePainter extends CustomPainter {
+  final double minWeight;
+  final double maxWeight;
+  final double currentWeight;
+
+  ScalePainter({
+    required this.minWeight,
+    required this.maxWeight,
+    required this.currentWeight,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.grey
+      ..strokeWidth = 1.0;
+
+    final highlightPaint = Paint()
+      ..color = Colors.yellow
+      ..strokeWidth = 2.0;
+
+    final textPainter = TextPainter(
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.center,
+    );
+
+    final step = (maxWeight - minWeight) / 50; // Number of major scale lines
+    final width = size.width - 40; // Padding on both sides
+
+    for (var i = 0; i <= 50; i++) {
+      final x = 20 + (i * width / 50);
+      final weight = minWeight + (i * step);
+      final isMajor = i % 5 == 0;
+      final isHighlighted =
+          weight >= currentWeight - step / 2 && weight <= currentWeight + step / 2;
+
+      // Draw scale line
+      canvas.drawLine(
+        Offset(x, size.height - (isMajor ? 40 : 30)),
+        Offset(x, size.height - 20),
+        isHighlighted ? highlightPaint : paint,
+      );
+
+      // Draw weight number for major lines
+      if (isMajor) {
+        textPainter.text = TextSpan(
+          text: weight.toStringAsFixed(0),
+          style: TextStyle(
+            color: isHighlighted ? Colors.yellow : Colors.grey,
+            fontSize: 12,
+          ),
+        );
+        textPainter.layout();
+        textPainter.paint(
+          canvas,
+          Offset(x - textPainter.width / 2, size.height - 60),
+        );
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(ScalePainter oldDelegate) =>
+      oldDelegate.currentWeight != currentWeight;
 }
 // Row(
 //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
